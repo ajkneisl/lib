@@ -27,16 +27,13 @@ class TokenManager(username: String, password: String) {
 
     init {
         val cache = Cache.getObject<Token>("token")
+        val token = cache?.getValue()
 
-        if (cache != null) {
-            val token = cache.getValue()
+        if (token != null && token.expiresOn - System.currentTimeMillis() > 0) {
+            Timer().schedule(timerTask { renewToken().subscribe() }, token.expiresOn)
+
             this.token = token
-
-            if (token.expiresOn - System.currentTimeMillis() > 0)
-                Timer().schedule(timerTask { renewToken().subscribe() }, token.expiresOn)
-        } else {
-            createToken(username, password).block() // needs to block :(
-        }
+        } else createToken(username, password).block() // needs to block :(
     }
 
     /**
