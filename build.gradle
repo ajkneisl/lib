@@ -46,10 +46,6 @@ dependencyManagement {
 
 jar {
     zip64 true
-    manifest {
-        attributes 'Main-Class': 'dev.shog.mojor.MojorKt'
-    }
-
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
