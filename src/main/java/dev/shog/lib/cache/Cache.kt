@@ -8,12 +8,18 @@ import java.io.File
 /**
  * Manages [CachedObject]s.
  */
-object Cache {
-    private val CACHE_DIR = File(FileHandler.SHOG_DEV_DIR.path + File.separatorChar + "cache")
-
+class Cache(private val cacheDirectory: File = File(FileHandler.SHOG_DEV_DIR.path + File.separatorChar + "globalCache")) {
     init {
-        if (!CACHE_DIR.exists() && !CACHE_DIR.mkdirs())
+        if (!cacheDirectory.exists() && !cacheDirectory.mkdirs())
             throw Exception("Could not create cache directory.")
+    }
+
+    companion object {
+        /**
+         * Get a [Cache] instance for an application using [applicationName]
+         */
+        fun forApplication(applicationName: String): Cache =
+                Cache(FileHandler.getApplicationFolder(applicationName))
     }
 
     /**
@@ -72,7 +78,7 @@ object Cache {
      * @return The value of the cache file.
      */
     private fun <T> getValue(key: String): T? {
-        val file = File(CACHE_DIR.path + File.separatorChar + "$key.shoch")
+        val file = File(cacheDirectory.path + File.separatorChar + "$key.shoch")
 
         return if (!file.exists())
             null
@@ -88,7 +94,7 @@ object Cache {
      * @param newValue The new value for the cache file.
      */
     private fun <T> setValue(key: String, newValue: T) {
-        val file = File(CACHE_DIR.path + File.separatorChar + "$key.shoch")
+        val file = File(cacheDirectory.path + File.separatorChar + "$key.shoch")
 
         if (!file.exists())
             file.createNewFile()
