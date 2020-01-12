@@ -32,7 +32,7 @@ class Cache(private val cacheDirectory: File = File(FileHandler.SHOG_DEV_DIR.pat
         val value = getValue<T>(key)
                 ?: return null
 
-        return CachedObject(key, value)
+        return CachedObject(this, key, value)
     }
 
     /**
@@ -45,7 +45,7 @@ class Cache(private val cacheDirectory: File = File(FileHandler.SHOG_DEV_DIR.pat
     fun <T> createObject(key: String, value: T): CachedObject<T>? {
         setValue(key, value)
 
-        return CachedObject(key, value)
+        return CachedObject(this, key, value)
     }
 
     /**

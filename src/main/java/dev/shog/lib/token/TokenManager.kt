@@ -14,7 +14,7 @@ import kotlin.concurrent.timerTask
  * @param username The username of the account to get the token from.
  * @param password The SHA-512 hex of the password of the same account.
  */
-class TokenManager(username: String, password: String) {
+class TokenManager(username: String, password: String, private val applicationName: String) {
     private var token: Token? = null
 
     /**
@@ -26,7 +26,7 @@ class TokenManager(username: String, password: String) {
             token?.token!!
 
     init {
-        val cache = Cache.getObject<Token>("token")
+        val cache = Cache.forApplication(applicationName).getObject<Token>("token")
         val token = cache?.getValue()
 
         if (token != null && token.expiresOn - System.currentTimeMillis() > 0) {
@@ -73,10 +73,10 @@ class TokenManager(username: String, password: String) {
      * Write token to the cache, using [Cache].
      */
     private fun writeToken(token: Token) {
-        val cache = Cache.getObject<Token>("token")
+        val cache = Cache.forApplication(applicationName).getObject<Token>("token")
 
         if (cache == null) {
-            Cache.createObject("token", token)
+            Cache.forApplication(applicationName).createObject("token", token)
         } else cache.setValue(token)
     }
 

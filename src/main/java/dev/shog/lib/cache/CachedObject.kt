@@ -8,7 +8,7 @@ package dev.shog.lib.cache
  * @param key The key of the cached object.
  * @param value The value of the cached object.
  */
-class CachedObject<T> internal constructor(internal val key: String, internal var value: T) {
+class CachedObject<T> internal constructor(private val cache: Cache, internal val key: String, internal var value: T) {
     /**
      * Get [value].
      */
@@ -19,13 +19,13 @@ class CachedObject<T> internal constructor(internal val key: String, internal va
      * Refresh [value] from file.
      */
     fun refreshValue() {
-        Cache.refreshValue(this)
+        cache.refreshValue(this)
     }
 
     /**
      * Set a new value for [value].
      */
     fun setValue(newValue: T) {
-        Cache.setValue(this, newValue)
+        cache.setValue(this, newValue)
     }
 }
