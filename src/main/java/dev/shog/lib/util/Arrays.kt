@@ -1,4 +1,4 @@
-package dev.shog.lib
+package dev.shog.lib.util
 
 /**
  * If a [Collection] contains any null values.

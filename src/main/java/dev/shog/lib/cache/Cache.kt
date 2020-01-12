@@ -1,8 +1,8 @@
 package dev.shog.lib.cache
 
 import dev.shog.lib.FileHandler
-import dev.shog.lib.readObject
-import dev.shog.lib.writeObject
+import dev.shog.lib.util.readObject
+import dev.shog.lib.util.writeObject
 import java.io.File
 
 /**

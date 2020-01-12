@@ -1,4 +1,4 @@
-package dev.shog.lib
+package dev.shog.lib.util
 
 import java.io.*
 
