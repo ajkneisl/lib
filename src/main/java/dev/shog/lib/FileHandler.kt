@@ -1,6 +1,5 @@
 package dev.shog.lib
 
-import dev.shog.lib.cache.Cache
 import sun.awt.OSInfo
 import java.io.File
 

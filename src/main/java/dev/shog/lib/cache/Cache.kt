@@ -19,7 +19,7 @@ class Cache(private val cacheDirectory: File = File(FileHandler.SHOG_DEV_DIR.pat
          * Get a [Cache] instance for an application using [applicationName]
          */
         fun forApplication(applicationName: String): Cache =
-                Cache(FileHandler.getApplicationFolder(applicationName))
+                Cache(File(FileHandler.getApplicationFolder(applicationName).path + File.separator + "cache"))
     }
 
     /**
