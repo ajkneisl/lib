@@ -38,12 +38,12 @@ object ConfigHandler {
      * Create a config using [configType] and [applicationName].
      *
      * @param configType The type of config to create.
-     * @param cfg The config to write.
+     * @param cfg The object to write.
      * @param applicationName The application to create the config for.
      * @param overwrite If the config exists, overwrite it? If this is false, this will still return a [Config] instance.
      * @return A [Config] instance.
      */
-    fun createConfig(configType: ConfigType, applicationName: String, cfg: ShoConfig, overwrite: Boolean = false): Config {
+    fun <T> createConfig(configType: ConfigType, applicationName: String, cfg: T, overwrite: Boolean = false): Config {
         val file = File(FileHandler.getApplicationFolder(applicationName).path + File.separator + "cfg." + configType.extension)
 
         if (file.exists() && !overwrite)

@@ -4,6 +4,15 @@ import dev.shog.lib.cache.Cache
 import dev.shog.lib.cfg.Config
 import dev.shog.lib.hook.DiscordWebhook
 
+/**
+ * An applicaiton instance.
+ *
+ * @param applicationName The name of the application.
+ * @param version The version of the application.
+ * @param config The configuration of the application.
+ * @param cache The cache of the application.
+ * @param webhook The webhook of the application.
+ */
 class Application(
         private val applicationName: String,
         private val version: Float,
@@ -11,15 +20,36 @@ class Application(
         private val cache: Cache? = null,
         private val webhook: DiscordWebhook? = null
 ) {
+    /**
+     * @return The cache
+     * @throws Exception If cache wasn't set in builder.
+     */
     fun getCache(): Cache =
             cache ?: throw Exception("This application does not have a cache.")
 
+    /**
+     * @return the Config object.
+     * @throws Exception If config wasn't set in builder
+     */
+    inline fun <reified T> getConfigObject(): T =
+            getConfig().asObject<T>()
+
+    /**
+     * @return The webhook
+     * @throws Exception If webhook wasn't set in builder.
+     */
     fun getWebhook(): DiscordWebhook =
             webhook ?: throw Exception("This application does not have a webhook.")
 
+    /**
+     * @return [applicationName]
+     */
     fun getName() =
             applicationName
 
+    /**
+     * @return [version]
+     */
     fun getVersion() =
             version
 
@@ -30,6 +60,10 @@ class Application(
         // TODO
     }
 
+    /**
+     * @return The config
+     * @throws Exception If config wasn't set in builder.
+     */
     fun getConfig(): Config =
             config ?: throw Exception("This application does not have a config.")
 }

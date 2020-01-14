@@ -14,18 +14,8 @@ class Config internal constructor(private val data: JSONObject) {
             data
 
     /**
-     * Get the config as a [ShoConfig].
-     *
-     * @param cfg An empty ShoConfig to cast to.
+     * Get the config as [K].
      */
-    fun asConfig(cfg: ShoConfig): ShoConfig =
-            ObjectMapper().readValue(asJsonObject().toString(), cfg::class.java)
-
-    /**
-     * Get the config as [T].
-     *
-     * @param obj The class of [T].
-     */
-    fun <T> asObject(obj: Class<T>): T =
-            ObjectMapper().readValue(asJsonObject().toString(), obj)
+    inline fun <reified K> asObject(): K =
+            ObjectMapper().readValue(asJsonObject().toString(), K::class.java)
 }
