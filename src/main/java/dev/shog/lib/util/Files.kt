@@ -3,6 +3,12 @@ package dev.shog.lib.util
 import java.io.*
 
 /**
+ * Create a file from [String].
+ */
+fun String.toFile(): File =
+        File(this)
+
+/**
  * Write a serializable object to file.
  *
  * @param obj The object to write.
