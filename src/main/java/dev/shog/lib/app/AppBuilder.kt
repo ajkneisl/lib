@@ -20,7 +20,7 @@ class AppBuilder {
     private var currentVersion = 1.0F
 
     /**
-     * The cnonfig for the application.
+     * The config for the application.
      */
     private var config: Config? = null
 
@@ -39,8 +39,8 @@ class AppBuilder {
      */
     private var applicationName = ""
 
-    fun withWebhook(webhook: DiscordWebhook): AppBuilder {
-        this.webhook = webhook
+    fun withWebhook(webhook: Config?.() -> DiscordWebhook): AppBuilder {
+        this.webhook = webhook.invoke(config)
         return this
     }
 
