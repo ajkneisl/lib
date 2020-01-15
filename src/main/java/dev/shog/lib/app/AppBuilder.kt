@@ -3,6 +3,7 @@ package dev.shog.lib.app
 import dev.shog.lib.cache.Cache
 import dev.shog.lib.cfg.Config
 import dev.shog.lib.hook.DiscordWebhook
+import dev.shog.lib.hook.WebhookUser
 import dev.shog.lib.util.eitherOr
 
 /**
@@ -44,6 +45,16 @@ class AppBuilder {
         return this
     }
 
+    fun withWebhook(webhook: DiscordWebhook): AppBuilder {
+        this.webhook = webhook
+        return this
+    }
+
+    fun withWebhook(webhookUrl: String, discordUser: WebhookUser = DiscordWebhook.defaultUser): AppBuilder {
+        this.webhook = DiscordWebhook(webhookUrl, discordUser)
+        return this
+    }
+
     fun withVersion(version: Float): AppBuilder {
         currentVersion = version
         return this
@@ -73,9 +84,6 @@ class AppBuilder {
      * Build this into [Application].
      */
     fun build(): Application {
-        if (applicationName == "")
-            throw Exception("Name is unset!")
-
         val cache = withCache.eitherOr(Cache.forApplication(applicationName), null)
 
         val app = Application(applicationName, currentVersion, config, cache, webhook)

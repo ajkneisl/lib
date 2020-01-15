@@ -66,7 +66,7 @@ class DiscordWebhook(private val webhookUrl: String, private val user: WebhookUs
         /**
          * The default user for the webhooks
          */
-        private val defaultUser = WebhookUser(
+        internal val defaultUser = WebhookUser(
                 "buta",
                 "https://cdn.discordapp.com/attachments/521062156024938498/636701089424605185/IMG_20191023_180024.jpg"
         )

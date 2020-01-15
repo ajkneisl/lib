@@ -1,8 +1,10 @@
 package dev.shog.lib.app
 
+import dev.shog.lib.ShoLibException
 import dev.shog.lib.cache.Cache
 import dev.shog.lib.cfg.Config
 import dev.shog.lib.hook.DiscordWebhook
+import reactor.core.publisher.Mono
 
 /**
  * An applicaiton instance.
@@ -25,7 +27,14 @@ class Application(
      * @throws Exception If cache wasn't set in builder.
      */
     fun getCache(): Cache =
-            cache ?: throw Exception("This application does not have a cache.")
+            cache ?: throw ShoLibException("This application does not have a cache.")
+
+    /**
+     * @return Mono for sending the message
+     * @throws Exception If webhook wasn't set in builder
+     */
+    fun sendMessage(message: String): Mono<Void> =
+            getWebhook().sendMessage(message)
 
     /**
      * @return the Config object.
@@ -39,7 +48,7 @@ class Application(
      * @throws Exception If webhook wasn't set in builder.
      */
     fun getWebhook(): DiscordWebhook =
-            webhook ?: throw Exception("This application does not have a webhook.")
+            webhook ?: throw ShoLibException("This application does not have a webhook.")
 
     /**
      * @return [applicationName]
@@ -65,5 +74,5 @@ class Application(
      * @throws Exception If config wasn't set in builder.
      */
     fun getConfig(): Config =
-            config ?: throw Exception("This application does not have a config.")
+            config ?: throw ShoLibException("This application does not have a config.")
 }

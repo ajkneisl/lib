@@ -1,6 +1,7 @@
 package dev.shog.lib.cache
 
 import dev.shog.lib.FileHandler
+import dev.shog.lib.ShoLibException
 import dev.shog.lib.util.readObject
 import dev.shog.lib.util.writeObject
 import java.io.File
@@ -11,7 +12,7 @@ import java.io.File
 class Cache(private val cacheDirectory: File = File(FileHandler.SHOG_DEV_DIR.path + File.separatorChar + "globalCache")) {
     init {
         if (!cacheDirectory.exists() && !cacheDirectory.mkdirs())
-            throw Exception("Could not create cache directory.")
+            throw ShoLibException("Could not create cache directory.")
     }
 
     companion object {

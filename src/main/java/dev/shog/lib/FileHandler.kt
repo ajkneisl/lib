@@ -8,7 +8,7 @@ object FileHandler {
         OSInfo.OSType.WINDOWS -> "${System.getenv("appdata")}\\shogdev"
         OSInfo.OSType.LINUX -> "/etc/shogdev"
 
-        else -> throw Exception("Unknown operating system.")
+        else -> throw ShoLibException("Unknown operating system.")
     })
 
     /**
@@ -17,6 +17,9 @@ object FileHandler {
      * @param applicationName The name of the application.
      */
     fun getApplicationFolder(applicationName: String): File {
+        if (applicationName.isBlank())
+            throw ShoLibException("ApplicationName must not be blank!")
+
         val folder = File(SHOG_DEV_DIR.path + File.separator + applicationName)
 
         if (!folder.exists())
@@ -27,6 +30,6 @@ object FileHandler {
 
     init {
         if (!SHOG_DEV_DIR.exists() && !SHOG_DEV_DIR.mkdir())
-            throw Exception("Could not create shogdev folder.")
+            throw ShoLibException("Could not create shogdev folder.")
     }
 }
