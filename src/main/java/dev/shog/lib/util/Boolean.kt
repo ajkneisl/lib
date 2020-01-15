@@ -25,4 +25,16 @@ fun Boolean.toEnabledDisabled(): String =
 fun Boolean.toYesNo(): String =
         eitherOr("yes", "no")
 
+/**
+ * Turn `true` into `success` and `false` into `fail`.
+ */
+fun Boolean.toSuccessFail(): String =
+        eitherOr("success", "fail")
+
+/**
+ * Turn `true` into `successful` and `false` into `failed`.
+ */
+fun Boolean.toSuccessfulFailed(): String =
+        eitherOr("successful", "failed")
+
 
