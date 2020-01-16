@@ -17,7 +17,10 @@ class DiscordWebhook(private val webhookUrl: String, private val user: WebhookUs
      * Send a message through the webhook.
      */
     fun sendMessage(message: String): Mono<Boolean> =
-            getJsonObject()
+            message.length
+                    .toMono()
+                    .filter { le -> 2000 > le }
+                    .flatMap { getJsonObject() }
                     .doOnNext { js -> js.put("content", message) }
                     .flatMap { js ->
                         Unirest.post(webhookUrl)
