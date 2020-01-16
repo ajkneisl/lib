@@ -39,7 +39,7 @@ class Application(
      * @return Mono for sending the message
      * @throws Exception If webhook wasn't set in builder
      */
-    fun sendMessage(message: String): Mono<Void> =
+    fun sendMessage(message: String): Mono<Boolean> =
             getWebhook().sendMessage(message)
 
     /**
