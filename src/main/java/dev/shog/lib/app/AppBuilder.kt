@@ -5,6 +5,10 @@ import dev.shog.lib.cfg.Config
 import dev.shog.lib.hook.DiscordWebhook
 import dev.shog.lib.hook.WebhookUser
 import dev.shog.lib.util.eitherOr
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import reactor.core.publisher.Mono
+import reactor.core.publisher.toMono
 
 /**
  * A builder for [Application].
@@ -26,6 +30,16 @@ class AppBuilder {
     private var config: Config? = null
 
     /**
+     * The logger for the application.
+     */
+    private var logger: Logger? = null
+
+    /**
+     * What to do if the program is out of date.
+     */
+    private var updateHook: (Application.(newVersion: Float) -> Mono<Void>)? = null
+
+    /**
      * The webhook for the application.
      */
     private var webhook: DiscordWebhook? = null
@@ -42,6 +56,18 @@ class AppBuilder {
 
     fun withWebhook(webhook: Config?.() -> DiscordWebhook): AppBuilder {
         this.webhook = webhook.invoke(config)
+        return this
+    }
+
+    fun withLogger(name: String = applicationName): AppBuilder {
+        if (!name.isBlank())
+            this.logger = LoggerFactory.getLogger(name)
+
+        return this
+    }
+
+    fun withUpdateHook(updateHook: (Application.(newVersion: Float) -> Mono<Void>)): AppBuilder {
+        this.updateHook = updateHook
         return this
     }
 
@@ -86,10 +112,10 @@ class AppBuilder {
     fun build(): Application {
         val cache = withCache.eitherOr(Cache.forApplication(applicationName), null)
 
-        val app = Application(applicationName, currentVersion, config, cache, webhook)
+        val app = Application(applicationName, currentVersion, config, cache, webhook, logger)
 
         if (shouldCheckUpdate)
-            app.checkUpdates()
+            app.checkUpdates(updateHook ?: {  Mono.empty<Void>() })
 
         return app
     }

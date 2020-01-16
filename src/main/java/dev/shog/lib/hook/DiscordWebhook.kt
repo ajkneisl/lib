@@ -1,7 +1,6 @@
 package dev.shog.lib.hook
 
 import dev.shog.lib.hook.DiscordWebhook.Companion.defaultUser
-import kong.unirest.HttpResponse
 import kong.unirest.Unirest
 import org.json.JSONObject
 import reactor.core.publisher.Mono
@@ -17,13 +16,17 @@ class DiscordWebhook(private val webhookUrl: String, private val user: WebhookUs
     /**
      * Send a message through the webhook.
      */
-    fun sendMessage(message: String): Mono<Void> =
+    fun sendMessage(message: String): Mono<Boolean> =
             getJsonObject()
                     .doOnNext { js -> js.put("content", message) }
-                    .flatMap { js -> makeRequest(js) }
-                    .map { req -> parseResponse(req) ?: ":)" }
-                    .doOnNext { resp -> if (resp != ":)") throw Exception("Invalid response from Discord.") }
-                    .then()
+                    .flatMap { js ->
+                        Unirest.post(webhookUrl)
+                                .header("Content-Type", "application/json")
+                                .body(js.toString())
+                                .asStringAsync()
+                                .toMono()
+                    }
+                    .map { req -> req.isSuccess }
 
     /**
      * Build the JSON object.
@@ -34,33 +37,6 @@ class DiscordWebhook(private val webhookUrl: String, private val user: WebhookUs
                     .doOnNext { js -> js.put("username", user.username) }
                     .doOnNext { js -> js.put("avatar_url", user.imageUrl) }
                     .doOnNext { js -> js.put("tts", false) }
-
-    /**
-     * Parse the response given by Discord.
-     *
-     * If it's null, then the request is unsuccessful.
-     */
-    private fun parseResponse(resp: HttpResponse<String>): String? {
-        return if (resp.status == 204)
-            null
-        else {
-            return try {
-                JSONObject(resp.body).toString()
-            } catch (e: Exception) {
-                null
-            }
-        }
-    }
-
-    /**
-     * Creates the request.
-     */
-    private fun makeRequest(jsonObject: JSONObject): Mono<HttpResponse<String>> =
-            Unirest.post(webhookUrl)
-                    .header("Content-Type", "application/json")
-                    .body(jsonObject.toString())
-                    .asStringAsync()
-                    .toMono()
 
     companion object {
         /**
