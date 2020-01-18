@@ -97,8 +97,10 @@ class Cache(private val cacheDirectory: File = File(FileHandler.SHOG_DEV_DIR.pat
     private fun <T> setValue(key: String, newValue: T) {
         val file = File(cacheDirectory.path + File.separatorChar + "$key.shoch")
 
-        if (!file.exists())
+        if (!file.exists()) {
+            file.mkdirs()
             file.createNewFile()
+        }
 
         file.writeObject(newValue)
     }
