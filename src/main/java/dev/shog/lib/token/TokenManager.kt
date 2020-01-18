@@ -49,7 +49,7 @@ class TokenManager(username: String, password: String, private val applicationNa
                     .asJsonAsync()
                     .toMono()
                     .filter { req -> req.isSuccess }
-                    .map { req -> req.body.`object`.getJSONObject("token")}
+                    .map { req -> req.body.`object`.getJSONObject("payload").getJSONObject("token")}
                     .doOnNext { token ->
                         Timer().schedule(
                                 timerTask { renewToken().subscribe() },
@@ -88,9 +88,8 @@ class TokenManager(username: String, password: String, private val applicationNa
                     .header("Authorization", "token $token")
                     .asJsonAsync()
                     .toMono()
-                    .filter { req -> req.body.`object`.getBoolean("successful") || !req.isSuccess }
-                    .doOnNext { req ->
-                        Timer().schedule(timerTask { renewToken().subscribe() }, req.body.`object`.getLong("newExpire").asDate())
-                    }
+                    .filter { req -> req.isSuccess }
+                    .map { req -> req.body.`object`.getJSONObject("payload") }
+                    .doOnNext { obj -> Timer().schedule(timerTask { renewToken().subscribe() }, obj.getLong("newExpire").asDate()) }
                     .then()
 }
