@@ -1,5 +1,6 @@
 package dev.shog.lib.app
 
+import dev.shog.lib.ShoLibException
 import dev.shog.lib.cache.Cache
 import dev.shog.lib.cfg.Config
 import dev.shog.lib.hook.DiscordWebhook
@@ -54,8 +55,23 @@ class AppBuilder {
      */
     private var applicationName = ""
 
+    @Deprecated(message = "Replaced", replaceWith = ReplaceWith("setWebhook"))
     fun withWebhook(webhook: Config?.() -> DiscordWebhook): AppBuilder {
         this.webhook = webhook.invoke(config)
+        return this
+    }
+
+    /**
+     * Set webhook.
+     *
+     * @param webhook The parameter to get the [DiscordWebhook] instance.
+     * @return The app builder.
+     */
+    fun setWebhook(webhook: (Config) -> DiscordWebhook): AppBuilder {
+        if (config == null)
+            throw ShoLibException("Config should be set before setting webhook!")
+
+        this.webhook = webhook.invoke(config!!)
         return this
     }
 
