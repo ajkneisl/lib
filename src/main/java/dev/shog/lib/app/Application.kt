@@ -47,7 +47,7 @@ class Application(
      * @throws Exception If config wasn't set in builder
      */
     inline fun <reified T> getConfigObject(): T =
-            getConfig().asObject<T>()
+            getConfig().asObject()
 
     /**
      * @return The webhook
