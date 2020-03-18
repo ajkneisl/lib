@@ -1,4 +1,4 @@
-package dev.shog.lib.cfg
+package dev.shog.lib.app.cfg
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory

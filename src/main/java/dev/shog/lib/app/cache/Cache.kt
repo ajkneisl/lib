@@ -1,4 +1,4 @@
-package dev.shog.lib.cache
+package dev.shog.lib.app.cache
 
 import dev.shog.lib.FileHandler
 import dev.shog.lib.ShoLibException
@@ -9,7 +9,9 @@ import java.io.File
 /**
  * Manages [CachedObject]s.
  */
-class Cache(private val cacheDirectory: File = File(FileHandler.SHOG_DEV_DIR.path + File.separatorChar + "globalCache")) {
+class Cache(
+        private val cacheDirectory: File = File(FileHandler.SHOG_DEV_DIR.path + File.separatorChar + "globalCache")
+) {
     init {
         if (!cacheDirectory.exists() && !cacheDirectory.mkdirs())
             throw ShoLibException("Could not create cache directory.")

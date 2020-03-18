@@ -2,8 +2,8 @@ package dev.shog.lib.app
 
 import dev.shog.lib.ShoLib
 import dev.shog.lib.ShoLibException
-import dev.shog.lib.cache.Cache
-import dev.shog.lib.cfg.Config
+import dev.shog.lib.app.cache.Cache
+import dev.shog.lib.app.cfg.Config
 import dev.shog.lib.hook.DiscordWebhook
 import dev.shog.lib.util.logTo
 import kong.unirest.Unirest

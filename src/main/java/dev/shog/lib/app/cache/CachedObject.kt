@@ -1,4 +1,4 @@
-package dev.shog.lib.cache
+package dev.shog.lib.app.cache
 
 /**
  * A cached object.

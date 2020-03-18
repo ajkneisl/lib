@@ -1,7 +1,7 @@
 package dev.shog.lib.token
 
 import dev.shog.lib.util.asDate
-import dev.shog.lib.cache.Cache
+import dev.shog.lib.app.cache.Cache
 import kong.unirest.Unirest
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
