@@ -1,10 +1,15 @@
 package dev.shog.lib.token
 
-import dev.shog.lib.util.asDate
+import dev.shog.lib.ShoLibException
+import dev.shog.lib.app.Application
 import dev.shog.lib.app.cache.Cache
-import kong.unirest.Unirest
-import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
+import dev.shog.lib.util.asDate
+import io.ktor.client.request.header
+import io.ktor.client.request.patch
+import io.ktor.client.request.post
+import io.ktor.util.AttributeKey
+import kotlinx.coroutines.runBlocking
+import org.json.JSONObject
 import java.util.*
 import kotlin.concurrent.timerTask
 
@@ -14,7 +19,7 @@ import kotlin.concurrent.timerTask
  * @param username The username of the account to get the token from.
  * @param password The SHA-512 hex of the password of the same account.
  */
-class TokenManager(username: String, password: String, private val applicationName: String) {
+class TokenManager(username: String, password: String, private val application: Application) {
     private var token: Token? = null
 
     /**
@@ -26,14 +31,21 @@ class TokenManager(username: String, password: String, private val applicationNa
             token?.token!!
 
     init {
-        val cache = Cache.forApplication(applicationName).getObject<Token>("token")
+        val cache = try {
+            application.getCache().getObject<Token>("token")
+        } catch (e: Exception) {
+            throw ShoLibException("A token manager couldn't be made due to the application not having a cache!")
+        }
+
         val token = cache?.getValue()
 
         if (token != null && token.expiresOn - System.currentTimeMillis() > 0) {
-            Timer().schedule(timerTask { renewToken().subscribe() }, token.expiresOn)
+            Timer().schedule(timerTask {
+                runBlocking { renewToken() }
+            }, token.expiresOn)
 
             this.token = token
-        } else createToken(username, password).block() // needs to block :(
+        } else runBlocking { createToken(username, password) }
     }
 
     /**
@@ -42,54 +54,61 @@ class TokenManager(username: String, password: String, private val applicationNa
      * @param username The username of the account.
      * @param password The password of the account.
      */
-    private fun createToken(username: String, password: String): Mono<Void> =
-            Unirest.post("https://api.shog.dev/v1/user")
-                    .field("username", username)
-                    .field("password", password)
-                    .asJsonAsync()
-                    .toMono()
-                    .filter { req -> req.isSuccess }
-                    .map { req -> req.body.`object`.getJSONObject("payload").getJSONObject("token")}
-                    .doOnNext { token ->
-                        Timer().schedule(
-                                timerTask { renewToken().subscribe() },
-                                token.getLong("expiresOn").asDate()
-                        )
-                    }
-                    .doOnNext { token ->
-                        val newToken = Token(
-                                token.getString("token"),
-                                token.getLong("owner"),
-                                token.getLong("createdOn"),
-                                token.getLong("expiresOn")
-                        )
+    private suspend fun createToken(username: String, password: String) {
+        val result = try {
+            application.getHttpClient().post<String>("https://api.shog.dev/v1/user") {
+                attributes.put(AttributeKey("username"), username)
+                attributes.put(AttributeKey("password"), password)
+            }
+        } catch (e: Exception) {
+            throw ShoLibException("Failed to get create token!")
+        }
 
-                        this.token = newToken
-                        writeToken(newToken)
-                    }
-                    .then()
+        val obj = JSONObject(result)
+        val token = obj.getJSONObject("payload").getJSONObject("token")
+
+        Timer().schedule(timerTask {
+            runBlocking { renewToken()  }
+        }, token.getLong("expiresOn").asDate())
+
+        val newToken = Token(
+                token.getString("token"),
+                token.getLong("owner"),
+                token.getLong("createdOn"),
+                token.getLong("expiresOn")
+        )
+
+        this.token = newToken
+        writeToken(newToken)
+    }
 
     /**
      * Write token to the cache, using [Cache].
      */
     private fun writeToken(token: Token) {
-        val cache = Cache.forApplication(applicationName).getObject<Token>("token")
+        val cache = application.getCache().getObject<Token>("token")
 
         if (cache == null) {
-            Cache.forApplication(applicationName).createObject("token", token)
+            application.getCache().createObject("token", token)
         } else cache.setValue(token)
     }
 
     /**
      * Renew [token].
      */
-    private fun renewToken(): Mono<Void> =
-            Unirest.patch("https://api.shog.dev/v1/token")
-                    .header("Authorization", "token $token")
-                    .asJsonAsync()
-                    .toMono()
-                    .filter { req -> req.isSuccess }
-                    .map { req -> req.body.`object`.getJSONObject("payload") }
-                    .doOnNext { obj -> Timer().schedule(timerTask { renewToken().subscribe() }, obj.getLong("newExpire").asDate()) }
-                    .then()
+    private suspend fun renewToken() {
+        val result = try {
+            application.getHttpClient().patch<String>("https://api.shog.dev/v1/token") {
+                header("Authorization", "token $token")
+            }
+        } catch (e: Exception) {
+            throw ShoLibException("Failed to get create token!")
+        }
+
+        val payload = JSONObject(result).getJSONObject("payload")
+
+        Timer().schedule(timerTask {
+            runBlocking { renewToken() }
+        }, payload.getLong("newExpire").asDate())
+    }
 }

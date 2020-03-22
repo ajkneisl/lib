@@ -17,13 +17,13 @@ fun <T, K> Map<T, K>.getOrNull(key: T): K? =
  * If [Map] has any null keys.
  */
 fun <T, K> Map<T?, K?>.hasNullKeys(): Boolean =
-        this.keys.stream().anyMatch { it == null }
+        keys.asSequence().any { it == null }
 
 /**
  * If [Map] has any null objects.
  */
 fun <T, K> Map<T?, K?>.hasNullObjects(): Boolean =
-        this.values.stream().anyMatch { it == null }
+        values.asSequence().any { it == null }
 
 /**
  * If [Map] has any null objects.

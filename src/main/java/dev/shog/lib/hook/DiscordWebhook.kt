@@ -1,10 +1,10 @@
 package dev.shog.lib.hook
 
+import dev.shog.lib.app.Application
 import dev.shog.lib.hook.DiscordWebhook.Companion.defaultUser
-import kong.unirest.Unirest
+import io.ktor.client.request.header
+import io.ktor.client.request.post
 import org.json.JSONObject
-import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 
 /**
  * The Discord Webhook Handler
@@ -12,34 +12,42 @@ import reactor.kotlin.core.publisher.toMono
  * @param webhookUrl The URL for the webhook.
  * @param user The user for the webhook. By default is [defaultUser].
  */
-class DiscordWebhook(private val webhookUrl: String, private val user: WebhookUser = defaultUser) {
+class DiscordWebhook(
+        private val webhookUrl: String,
+        private val application: Application,
+        private val user: WebhookUser = defaultUser
+) {
     /**
      * Send a message through the webhook.
      */
-    fun sendMessage(message: String): Mono<Boolean> =
-            message.length
-                    .toMono()
-                    .filter { le -> 2000 > le }
-                    .flatMap { getJsonObject() }
-                    .doOnNext { js -> js.put("content", message) }
-                    .flatMap { js ->
-                        Unirest.post(webhookUrl)
-                                .header("Content-Type", "application/json")
-                                .body(js.toString())
-                                .asStringAsync()
-                                .toMono()
-                    }
-                    .map { req -> req.isSuccess }
+    suspend fun sendMessage(message: String): Boolean {
+        if (message.length > 2000)
+            return false
+
+        val obj = getJsonObject()
+                .put("content", message)
+
+        try {
+            application.getHttpClient().post<String>(webhookUrl) {
+                header("Content-Type", "application/json")
+                body = obj.toString()
+            }
+
+            return true
+        } catch (e: Exception) {
+        }
+
+        return false
+    }
 
     /**
      * Build the JSON object.
      */
-    private fun getJsonObject(): Mono<JSONObject> =
+    private fun getJsonObject(): JSONObject =
             JSONObject()
-                    .toMono()
-                    .doOnNext { js -> js.put("username", user.username) }
-                    .doOnNext { js -> js.put("avatar_url", user.imageUrl) }
-                    .doOnNext { js -> js.put("tts", false) }
+                    .put("username", user.username)
+                    .put("avatar_url", user.imageUrl)
+                    .put("tts", false)
 
     companion object {
         /**

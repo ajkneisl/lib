@@ -1,12 +1,11 @@
 package dev.shog.lib
 
-import sun.awt.OSInfo
 import java.io.File
 
 object FileHandler {
-     internal val SHOG_DEV_DIR = File(when (OSInfo.getOSType()) {
-        OSInfo.OSType.WINDOWS -> "${System.getenv("appdata")}\\shogdev"
-        OSInfo.OSType.LINUX -> "/etc/shogdev"
+    internal val SHOG_DEV_DIR = File(when {
+        System.getProperty("os.name").contains("win") -> "${System.getenv("appdata")}\\shogdev"
+        System.getProperty("os.name").contains("ix") -> "/etc/shogdev"
 
         else -> throw ShoLibException("Unknown operating system.")
     })

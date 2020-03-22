@@ -1,6 +1,7 @@
 package dev.shog.lib
 
 import dev.shog.lib.app.AppBuilder
+import org.slf4j.LoggerFactory
 
 object ShoLib {
     /**
@@ -8,11 +9,17 @@ object ShoLib {
      */
     private const val VERSION = 1.0F
 
+    /**
+     * Default logger
+     */
+    val DEFAULT_LOGGER = LoggerFactory.getLogger("SHGDEV")!!
+
     val APP = AppBuilder()
-            .withName("lib")
-            .withVersion(VERSION)
-            .withLogger()
-            .checkUpdates(true)
+            .configure {
+                name = "shgdev.lib"
+                version = VERSION
+                checkUpdates = true
+            }
             .build()
 
     init { APP }
