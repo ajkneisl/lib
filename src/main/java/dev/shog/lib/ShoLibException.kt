@@ -5,5 +5,5 @@ package dev.shog.lib
  *
  * @param message The message for the exception.
  */
-class ShoLibException internal constructor(message: String):
+class ShoLibException internal constructor(message: String, otherException: Exception? = null):
         Exception(message)

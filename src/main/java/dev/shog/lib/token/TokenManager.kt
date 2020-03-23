@@ -4,9 +4,13 @@ import dev.shog.lib.ShoLibException
 import dev.shog.lib.app.Application
 import dev.shog.lib.app.cache.Cache
 import dev.shog.lib.util.asDate
+import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.header
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.url
+import io.ktor.http.Parameters
+import io.ktor.http.URLBuilder
 import io.ktor.util.AttributeKey
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
@@ -56,12 +60,14 @@ class TokenManager(username: String, password: String, private val application: 
      */
     private suspend fun createToken(username: String, password: String) {
         val result = try {
-            application.getHttpClient().post<String>("https://api.shog.dev/v1/user") {
-                attributes.put(AttributeKey("username"), username)
-                attributes.put(AttributeKey("password"), password)
+            application.getHttpClient().submitForm<String>(Parameters.build {
+                append("username", username)
+                append("password", password)
+            }) {
+                url("https://api.shog.dev/v1/user")
             }
         } catch (e: Exception) {
-            throw ShoLibException("Failed to get create token!")
+            throw ShoLibException("Failed to get create token!", e)
         }
 
         val obj = JSONObject(result)
