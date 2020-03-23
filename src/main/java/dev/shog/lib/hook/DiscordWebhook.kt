@@ -1,7 +1,7 @@
 package dev.shog.lib.hook
 
-import dev.shog.lib.app.Application
 import dev.shog.lib.hook.DiscordWebhook.Companion.defaultUser
+import io.ktor.client.HttpClient
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import org.json.JSONObject
@@ -14,7 +14,7 @@ import org.json.JSONObject
  */
 class DiscordWebhook(
         private val webhookUrl: String,
-        private val application: Application,
+        private val httpClient: HttpClient,
         private val user: WebhookUser = defaultUser
 ) {
     /**
@@ -28,7 +28,7 @@ class DiscordWebhook(
                 .put("content", message)
 
         try {
-            application.getHttpClient().post<String>(webhookUrl) {
+            httpClient.post<String>(webhookUrl) {
                 header("Content-Type", "application/json")
                 body = obj.toString()
             }
