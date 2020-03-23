@@ -4,8 +4,13 @@ import java.io.File
 
 object FileHandler {
     internal val SHOG_DEV_DIR = File(when {
-        System.getProperty("os.name").contains("win") -> "${System.getenv("appdata")}\\shogdev"
-        System.getProperty("os.name").contains("ix") -> "/etc/shogdev"
+        System.getProperty("os.name")
+                .toLowerCase()
+                .contains("win") -> "${System.getenv("appdata")}\\shogdev"
+
+        System.getProperty("os.name")
+                .toLowerCase()
+                .contains("ix") -> "/etc/shogdev"
 
         else -> throw ShoLibException("Unknown operating system.")
     })
