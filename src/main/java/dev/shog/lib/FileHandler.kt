@@ -10,7 +10,7 @@ object FileHandler {
 
         System.getProperty("os.name")
                 .toLowerCase()
-                .contains("ix") -> "/etc/shogdev"
+                .contains("linux") -> "/etc/shogdev"
 
         else -> throw ShoLibException("Unknown operating system.")
     })
