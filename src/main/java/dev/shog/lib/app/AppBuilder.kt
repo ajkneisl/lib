@@ -5,22 +5,18 @@ import dev.shog.lib.app.cache.Cache
 import dev.shog.lib.app.cfg.Config
 import dev.shog.lib.hook.DiscordWebhook
 import dev.shog.lib.util.eitherOr
-import io.ktor.client.HttpClient
 import org.slf4j.Logger
 
 /**
  * A builder for [Application].
  */
-class AppBuilder {
+class AppBuilder(val name: String, val version: Float) {
     var checkUpdates = false
-    var version = 1.0F
     var config: Config? = null
     var logger: Logger? = null
     var updateHook: (Application.(newVersion: Float) -> Unit)? = null
     var webhook: DiscordWebhook? = null
     var useCache = false
-    var name = ""
-    var httpClient: HttpClient? = null
 
     /**
      * Set [config].
@@ -57,7 +53,7 @@ class AppBuilder {
     fun build(): Application {
         val cache = useCache.eitherOr(Cache.forApplication(name), null)
 
-        val app = Application(name, version, config, cache, webhook, logger, httpClient)
+        val app = Application(name, version, config, cache, webhook, logger)
 
         if (checkUpdates)
             app.checkUpdates(updateHook ?: { })

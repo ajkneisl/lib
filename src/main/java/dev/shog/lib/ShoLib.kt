@@ -14,12 +14,8 @@ object ShoLib {
      */
     val DEFAULT_LOGGER = LoggerFactory.getLogger("SHGDEV")!!
 
-    val APP = AppBuilder()
-            .configure {
-                name = "shgdev.lib"
-                version = VERSION
-                checkUpdates = true
-            }
+    val APP = AppBuilder("shgdev.lib", VERSION)
+            .configure { checkUpdates = true }
             .build()
 
     init { APP }

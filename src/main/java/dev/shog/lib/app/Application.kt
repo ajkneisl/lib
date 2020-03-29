@@ -5,7 +5,6 @@ import dev.shog.lib.app.cache.Cache
 import dev.shog.lib.app.cfg.Config
 import dev.shog.lib.hook.DiscordWebhook
 import dev.shog.lib.token.TokenManager
-import io.ktor.client.HttpClient
 import org.slf4j.Logger
 
 /**
@@ -18,7 +17,6 @@ class Application internal constructor(
         private val cache: Cache? = null,
         private val webhook: DiscordWebhook? = null,
         private val logger: Logger? = null,
-        private val httpClient: HttpClient? = null,
         private val tokenManager: TokenManager? = null
 ) {
     /**
@@ -27,13 +25,6 @@ class Application internal constructor(
      */
     fun getTokenManager(): TokenManager =
             tokenManager ?: throw ShoLibException("This application does not have a Token Manager.")
-
-    /**
-     * @return The HTTP client
-     * @throws Exception If HTTP client wasn't set in the builder.
-     */
-    fun getHttpClient(): HttpClient =
-            httpClient ?: throw ShoLibException("This application does not have a HTTP Client.")
 
     /**
      * @return The cache

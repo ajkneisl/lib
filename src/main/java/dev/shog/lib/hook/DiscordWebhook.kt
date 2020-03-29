@@ -1,9 +1,8 @@
 package dev.shog.lib.hook
 
+import dev.shog.lib.app.Application
 import dev.shog.lib.hook.DiscordWebhook.Companion.defaultUser
-import io.ktor.client.HttpClient
-import io.ktor.client.request.header
-import io.ktor.client.request.post
+import kong.unirest.Unirest
 import org.json.JSONObject
 
 /**
@@ -14,30 +13,43 @@ import org.json.JSONObject
  */
 class DiscordWebhook(
         private val webhookUrl: String,
-        private val httpClient: HttpClient,
         private val user: WebhookUser = defaultUser
 ) {
     /**
+     * Send a message through a file. This avoids the 2000 character limit.
+     *
+     * @param message A small message.
+     * @param file A large message.
+     * @param fileName The file's name.
+     */
+    fun sendBigMessage(message: String, file: String, fileName: String = "content.txt"): Boolean {
+        if (message.length > 2000)
+            return false
+
+        val bytes = file.toByteArray()
+
+        return Unirest.post(webhookUrl)
+                .field("payload_json", getJsonObject().put("content", message))
+                .field("file", bytes, fileName)
+                .asEmpty()
+                .isSuccess
+    }
+
+    /**
      * Send a message through the webhook.
      */
-    suspend fun sendMessage(message: String): Boolean {
+    fun sendMessage(message: String): Boolean {
         if (message.length > 2000)
             return false
 
         val obj = getJsonObject()
                 .put("content", message)
 
-        try {
-            httpClient.post<String>(webhookUrl) {
-                header("Content-Type", "application/json")
-                body = obj.toString()
-            }
-
-            return true
-        } catch (e: Exception) {
-        }
-
-        return false
+        return Unirest.post(webhookUrl)
+                .header("Content-Type", "application/json")
+                .body(obj.toString())
+                .asEmpty()
+                .isSuccess
     }
 
     /**

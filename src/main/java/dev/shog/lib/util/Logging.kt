@@ -45,9 +45,17 @@ fun <T : Throwable> T.logTo(app: Application): T {
 }
 
 /**
+ * Log [T] to [Application.getLogger]
+ */
+fun <T> T.logDiscord(app: Application): T {
+    app.getWebhook().sendMessage("${app.getName()} (v${app.getVersion()})\n\n" + this.toString())
+    return this
+}
+
+/**
  * Log a [Throwable] to [Application.getWebhook].
  */
-suspend fun <T : Throwable> T.logDiscord(app: Application): T {
-    app.getWebhook().sendMessage("${app.getName()} (v${app.getVersion()})\n\n" + ExceptionUtils.getMessage(this))
+fun <T : Throwable> T.logDiscord(app: Application): T {
+    app.getWebhook().sendBigMessage("${app.getName()} (v${app.getVersion()}):\n`${ExceptionUtils.getMessage(this)}`", ExceptionUtils.getStackTrace(this), "exception.txt")
     return this
 }

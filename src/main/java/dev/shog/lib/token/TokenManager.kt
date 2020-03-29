@@ -4,14 +4,7 @@ import dev.shog.lib.ShoLibException
 import dev.shog.lib.app.Application
 import dev.shog.lib.app.cache.Cache
 import dev.shog.lib.util.asDate
-import io.ktor.client.request.forms.submitForm
-import io.ktor.client.request.header
-import io.ktor.client.request.patch
-import io.ktor.client.request.post
-import io.ktor.client.request.url
-import io.ktor.http.Parameters
-import io.ktor.http.URLBuilder
-import io.ktor.util.AttributeKey
+import kong.unirest.Unirest
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import java.util.*
@@ -58,19 +51,16 @@ class TokenManager(username: String, password: String, private val application: 
      * @param username The username of the account.
      * @param password The password of the account.
      */
-    private suspend fun createToken(username: String, password: String) {
-        val result = try {
-            application.getHttpClient().submitForm<String>(Parameters.build {
-                append("username", username)
-                append("password", password)
-            }) {
-                url("https://api.shog.dev/v1/user")
-            }
-        } catch (e: Exception) {
-            throw ShoLibException("Failed to get create token!", e)
-        }
+    private fun createToken(username: String, password: String) {
+        val result = Unirest.post("https://api.shog.dev/v1/user")
+                .field("username", username)
+                .field("password", password)
+                .asString()
 
-        val obj = JSONObject(result)
+        if (!result.isSuccess)
+            throw ShoLibException("Failed to create token!")
+
+        val obj = JSONObject(result.body)
         val token = obj.getJSONObject("payload").getJSONObject("token")
 
         Timer().schedule(timerTask {
@@ -103,15 +93,14 @@ class TokenManager(username: String, password: String, private val application: 
      * Renew [token].
      */
     private suspend fun renewToken() {
-        val result = try {
-            application.getHttpClient().patch<String>("https://api.shog.dev/v1/token") {
-                header("Authorization", "token $token")
-            }
-        } catch (e: Exception) {
-            throw ShoLibException("Failed to get create token!")
-        }
+        val result = Unirest.patch("https://api.shog.dev/v1/token")
+                .header("Authorization", "token $token")
+                .asString()
 
-        val payload = JSONObject(result).getJSONObject("payload")
+        if (!result.isSuccess)
+            throw ShoLibException("Failed to renew token!")
+
+        val payload = JSONObject(result.body).getJSONObject("payload")
 
         Timer().schedule(timerTask {
             runBlocking { renewToken() }
