@@ -4,6 +4,7 @@ import dev.shog.lib.ShoLibException
 import dev.shog.lib.app.Application
 import dev.shog.lib.app.cache.Cache
 import dev.shog.lib.util.asDate
+import dev.shog.lib.util.getAge
 import kong.unirest.Unirest
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
@@ -24,7 +25,7 @@ class TokenManager(username: String, password: String, private val application: 
      *
      * This could throw an exception due to [token] not being initialized.
      */
-    fun getProperToken(): String =
+    fun getToken(): String =
             token?.token!!
 
     init {
@@ -36,13 +37,15 @@ class TokenManager(username: String, password: String, private val application: 
 
         val token = cache?.getValue()
 
-        if (token != null && token.expiresOn - System.currentTimeMillis() > 0) {
+        if (token != null && token.expiresOn.getAge() > 0) {
             Timer().schedule(timerTask {
                 runBlocking { renewToken() }
             }, token.expiresOn)
 
             this.token = token
-        } else runBlocking { createToken(username, password) }
+        } else runBlocking {
+            createToken(username, password)
+        }
     }
 
     /**
@@ -105,5 +108,15 @@ class TokenManager(username: String, password: String, private val application: 
         Timer().schedule(timerTask {
             runBlocking { renewToken() }
         }, payload.getLong("newExpire").asDate())
+
+        val token = Token(
+                payload.getString("token"),
+                payload.getLong("owner"),
+                payload.getLong("createdOn"),
+                payload.getLong("expiresOn")
+        )
+
+        this.token = token
+        writeToken(token)
     }
 }
