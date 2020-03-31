@@ -38,7 +38,7 @@ class TokenManager(username: String, password: String, private val application: 
         val token = cache?.getValue()
 
         if (token != null) runBlocking {
-                renewToken()
+                try { renewToken() } catch (ex: Exception) {}
                 this@TokenManager.token = token
         } else runBlocking {
             createToken(username, password)
