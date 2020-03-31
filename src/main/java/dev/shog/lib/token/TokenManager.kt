@@ -17,7 +17,7 @@ import kotlin.concurrent.timerTask
  * @param username The username of the account to get the token from.
  * @param password The SHA-512 hex of the password of the same account.
  */
-class TokenManager(username: String, password: String, private val application: Application) {
+class TokenManager(username: String, password: String) {
     private var token: Token? = null
 
     /**
@@ -28,22 +28,7 @@ class TokenManager(username: String, password: String, private val application: 
     fun getToken(): String =
             token?.token!!
 
-    init {
-        val cache = try {
-            application.getCache().getObject<Token>("token")
-        } catch (e: Exception) {
-            throw ShoLibException("A token manager couldn't be made due to the application not having a cache!")
-        }
-
-        val token = cache?.getValue()
-
-        if (token != null) runBlocking {
-                try { renewToken() } catch (ex: Exception) {}
-                this@TokenManager.token = token
-        } else runBlocking {
-            createToken(username, password)
-        }
-    }
+    init { createToken(username, password) }
 
     /**
      * Create a token using the shog.dev api.
@@ -75,18 +60,6 @@ class TokenManager(username: String, password: String, private val application: 
         )
 
         this.token = newToken
-        writeToken(newToken)
-    }
-
-    /**
-     * Write token to the cache, using [Cache].
-     */
-    private fun writeToken(token: Token) {
-        val cache = application.getCache().getObject<Token>("token")
-
-        if (cache == null) {
-            application.getCache().createObject("token", token)
-        } else cache.setValue(token)
     }
 
     /**
@@ -114,6 +87,5 @@ class TokenManager(username: String, password: String, private val application: 
         )
 
         this.token = token
-        writeToken(token)
     }
 }
