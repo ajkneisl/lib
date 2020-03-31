@@ -37,12 +37,9 @@ class TokenManager(username: String, password: String, private val application: 
 
         val token = cache?.getValue()
 
-        if (token != null && System.currentTimeMillis() - token.expiresOn < 0) {
-            Timer().schedule(timerTask {
-                runBlocking { renewToken() }
-            }, token.expiresOn)
-
-            this.token = token
+        if (token != null) runBlocking {
+                renewToken()
+                this@TokenManager.token = token
         } else runBlocking {
             createToken(username, password)
         }
