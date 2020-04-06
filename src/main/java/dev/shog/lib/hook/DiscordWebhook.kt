@@ -1,9 +1,11 @@
 package dev.shog.lib.hook
 
-import dev.shog.lib.app.Application
 import dev.shog.lib.hook.DiscordWebhook.Companion.defaultUser
+import dev.shog.lib.util.ifSo
 import kong.unirest.Unirest
 import org.json.JSONObject
+import java.io.File
+import java.util.concurrent.CompletableFuture
 
 /**
  * The Discord Webhook Handler
@@ -16,31 +18,50 @@ class DiscordWebhook(
         private val user: WebhookUser = defaultUser
 ) {
     /**
+     * Send a file & optional message.
+     *
+     * @param file The file.
+     * @param message The message.
+     */
+    fun sendFile(file: File, message: String = ""): CompletableFuture<Boolean> {
+        if (message.length > 2000 || !file.exists())
+            return CompletableFuture.completedFuture(false)
+
+        val bytes = file.inputStream().readBytes()
+
+        return Unirest.post(webhookUrl)
+                .ifSo(message.isNotBlank()) { field("payload_json", getJsonObject().put("content", message)) }
+                .field("file", bytes, file.name)
+                .asEmptyAsync()
+                .handleAsync { t, _ -> t.isSuccess }
+    }
+
+    /**
      * Send a message through a file. This avoids the 2000 character limit.
      *
      * @param message A small message.
      * @param file A large message.
      * @param fileName The file's name.
      */
-    fun sendBigMessage(message: String, file: String, fileName: String = "content.txt"): Boolean {
+    fun sendBigMessage(message: String, file: String, fileName: String = "content.txt"): CompletableFuture<Boolean> {
         if (message.length > 2000)
-            return false
+            return CompletableFuture.completedFuture(false)
 
         val bytes = file.toByteArray()
 
         return Unirest.post(webhookUrl)
                 .field("payload_json", getJsonObject().put("content", message))
                 .field("file", bytes, fileName)
-                .asEmpty()
-                .isSuccess
+                .asEmptyAsync()
+                .handleAsync { t, _ -> t.isSuccess }
     }
 
     /**
      * Send a message through the webhook.
      */
-    fun sendMessage(message: String): Boolean {
+    fun sendMessage(message: String): CompletableFuture<Boolean> {
         if (message.length > 2000)
-            return false
+            return CompletableFuture.completedFuture(false)
 
         val obj = getJsonObject()
                 .put("content", message)
@@ -48,8 +69,8 @@ class DiscordWebhook(
         return Unirest.post(webhookUrl)
                 .header("Content-Type", "application/json")
                 .body(obj.toString())
-                .asEmpty()
-                .isSuccess
+                .asEmptyAsync()
+                .handleAsync { t, _ -> t.isSuccess  }
     }
 
     /**
