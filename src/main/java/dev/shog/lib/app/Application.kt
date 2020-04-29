@@ -6,6 +6,7 @@ import dev.shog.lib.app.cfg.Config
 import dev.shog.lib.hook.DiscordWebhook
 import dev.shog.lib.token.TokenManager
 import org.slf4j.Logger
+import java.util.concurrent.CompletableFuture
 
 /**
  * An application.
@@ -37,7 +38,7 @@ class Application internal constructor(
      * @return Mono for sending the message
      * @throws Exception If webhook wasn't set in builder
      */
-    suspend fun sendMessage(message: String): Boolean =
+    fun sendMessage(message: String): CompletableFuture<Boolean> =
             getWebhook().sendMessage(message)
 
     /**

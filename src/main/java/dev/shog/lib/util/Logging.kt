@@ -58,8 +58,7 @@ fun <T> T.logDiscord(app: Application): T {
 fun <T : Throwable> T.logDiscord(app: Application): T {
     app.getWebhook().sendBigMessage(
             "[${app.getName()}:v${app.getVersion()}]:\n`${ExceptionUtils.getMessage(this)}`",
-            ExceptionUtils.getStackTrace(this),
-            "exception.txt"
+            ExceptionUtils.getStackTrace(this)
     )
     return this
 }

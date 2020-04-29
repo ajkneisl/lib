@@ -2,14 +2,12 @@ package dev.shog.lib.token
 
 import dev.shog.lib.ShoLibException
 import dev.shog.lib.app.Application
-import dev.shog.lib.app.cache.Cache
 import dev.shog.lib.util.asDate
-import dev.shog.lib.util.getAge
+import dev.shog.lib.util.blockingTimerTask
 import kong.unirest.Unirest
-import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import java.util.*
-import kotlin.concurrent.timerTask
+import java.util.concurrent.CompletableFuture
 
 /**
  * Manages a token and makes sure it's always active.
@@ -18,7 +16,12 @@ import kotlin.concurrent.timerTask
  * @param password The SHA-512 hex of the password of the same account.
  */
 class TokenManager(username: String, password: String) {
-    private var token: Token? = null
+    private var token = createToken(username, password).join()
+
+    /**
+     * The [Application] the token manager should log to.
+     */
+    var appLog: Application? = null
 
     /**
      * Get the actual token string from [token].
@@ -26,9 +29,7 @@ class TokenManager(username: String, password: String) {
      * This could throw an exception due to [token] not being initialized.
      */
     fun getToken(): String =
-            token?.token!!
-
-    init { createToken(username, password) }
+            token.token
 
     /**
      * Create a token using the shog.dev api.
@@ -36,56 +37,64 @@ class TokenManager(username: String, password: String) {
      * @param username The username of the account.
      * @param password The password of the account.
      */
-    private fun createToken(username: String, password: String) {
-        val result = Unirest.post("https://api.shog.dev/v1/user")
-                .field("username", username)
-                .field("password", password)
-                .asString()
+    private fun createToken(username: String, password: String): CompletableFuture<Token> =
+            Unirest.post("http://localhost:8080/v1/user")
+                    .field("username", username)
+                    .field("password", password)
+                    .asStringAsync()
+                    .handleAsync { result, _ ->
+                        if (!result.isSuccess)
+                            throw ShoLibException("Failed to create token! HTTP Response: ${result.body}")
 
-        if (!result.isSuccess)
-            throw ShoLibException("Failed to create token!")
+                        val obj = JSONObject(result.body)
+                        val token = obj.getJSONObject("payload").getJSONObject("token")
 
-        val obj = JSONObject(result.body)
-        val token = obj.getJSONObject("payload").getJSONObject("token")
+                        scheduleRenew(token.getLong("expiresOn").asDate())
 
-        Timer().schedule(timerTask {
-            runBlocking { renewToken()  }
-        }, token.getLong("expiresOn").asDate())
+                        val newToken = Token(
+                                token.getString("token"),
+                                UUID.fromString(token.getString("owner")),
+                                token.getLong("createdOn"),
+                                token.getLong("expiresOn")
+                        )
 
-        val newToken = Token(
-                token.getString("token"),
-                token.getLong("owner"),
-                token.getLong("createdOn"),
-                token.getLong("expiresOn")
-        )
+                        this.token = newToken
 
-        this.token = newToken
+                        newToken
+                    }
+
+
+    private fun scheduleRenew(expire: Date) {
+        Timer().schedule(blockingTimerTask {
+            renewToken()
+        }, expire)
     }
 
     /**
      * Renew [token].
      */
-    private suspend fun renewToken() {
-        val result = Unirest.patch("https://api.shog.dev/v1/token")
+    private fun renewToken(): CompletableFuture<Token> {
+        return Unirest.patch("http://localhost:8080/v1/token")
                 .header("Authorization", "token $token")
-                .asString()
+                .asStringAsync()
+                .handleAsync { result, _ ->
+                    if (!result.isSuccess)
+                        throw ShoLibException("Failed to renew token! HTTP Response: ${result.body}")
 
-        if (!result.isSuccess)
-            throw ShoLibException("Failed to renew token!")
+                    val payload = JSONObject(result.body).getJSONObject("payload")
 
-        val payload = JSONObject(result.body).getJSONObject("payload")
+                    val token = Token(
+                            payload.getString("token"),
+                            UUID.fromString(payload.getString("owner")),
+                            payload.getLong("createdOn"),
+                            payload.getLong("expiresOn")
+                    )
 
-        Timer().schedule(timerTask {
-            runBlocking { renewToken() }
-        }, payload.getLong("newExpire").asDate())
+                    this.token = token
 
-        val token = Token(
-                payload.getString("token"),
-                payload.getLong("owner"),
-                payload.getLong("createdOn"),
-                payload.getLong("expiresOn")
-        )
+                    scheduleRenew(token.expiresOn.asDate())
 
-        this.token = token
+                    token
+                }
     }
 }
