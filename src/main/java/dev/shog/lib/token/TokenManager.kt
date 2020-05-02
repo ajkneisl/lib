@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture
  * @param username The username of the account to get the token from.
  * @param password The SHA-512 hex of the password of the same account.
  */
-class TokenManager(username: String, password: String) {
+class TokenManager(username: String, password: String, private val baseUrl: String = "api.shog.dev") {
     private var token = createToken(username, password).join()
 
     /**
@@ -38,7 +38,7 @@ class TokenManager(username: String, password: String) {
      * @param password The password of the account.
      */
     private fun createToken(username: String, password: String): CompletableFuture<Token> =
-            Unirest.post("http://localhost:8080/v1/user")
+            Unirest.post("${baseUrl}/v1/user")
                     .field("username", username)
                     .field("password", password)
                     .asStringAsync()
@@ -74,7 +74,7 @@ class TokenManager(username: String, password: String) {
      * Renew [token].
      */
     private fun renewToken(): CompletableFuture<Token> {
-        return Unirest.patch("http://localhost:8080/v1/token")
+        return Unirest.patch("${baseUrl}/v1/token")
                 .header("Authorization", "token $token")
                 .asStringAsync()
                 .handleAsync { result, _ ->
