@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture
  * @param username The username of the account to get the token from.
  * @param password The SHA-512 hex of the password of the same account.
  */
-class TokenManager(username: String, password: String, private val baseUrl: String = "api.shog.dev") {
+class TokenManager(username: String, password: String, private val baseUrl: String = "https://api.shog.dev") {
     private var token = createToken(username, password).join()
 
     /**
