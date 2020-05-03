@@ -1,6 +1,7 @@
 package dev.shog.lib.global
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import dev.shog.lib.FileHandler
 import dev.shog.lib.ShoLib
 import dev.shog.lib.ShoLibException
@@ -22,7 +23,7 @@ object GlobalVariableHandler {
             variables[key] ?: throw ShoLibException("That variable doesn't exist!")
 
     init {
-        val mapper = ObjectMapper()
+        val mapper = ObjectMapper(YAMLFactory())
 
         if (variablesFile.exists()) {
             variables = mapper.readValue(
@@ -33,7 +34,7 @@ object GlobalVariableHandler {
             ShoLib.DEFAULT_LOGGER.debug("Creating global variables YML file...")
 
             variablesFile.createNewFile()
-            variables = hashMapOf()
+            variables = hashMapOf("pog" to "champ")
 
             mapper.writeValue(variablesFile, variables)
         }
