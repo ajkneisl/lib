@@ -19,7 +19,8 @@ object ConfigHandler {
      * @param applicationName The name of the application.
      * @return A [Config] instance.
      */
-    fun getConfig(configType: ConfigType, applicationName: String): Config {
+    @Throws(ShoLibException::class)
+    private fun getConfig(configType: ConfigType, applicationName: String): Config {
         val file = File(FileHandler.getApplicationFolder(applicationName).path + File.separator + "cfg." + configType.extension)
         val data = String(file.inputStream().readBytes())
 
@@ -52,7 +53,8 @@ object ConfigHandler {
      * @throws ShoLibException If there's an issue writing the config.
      * @return A [Config] instance.
      */
-    fun <T> createConfig(configType: ConfigType, applicationName: String, cfg: T, overwrite: Boolean = false): Config {
+    @Throws(ShoLibException::class)
+    fun <T> useConfig(configType: ConfigType, applicationName: String, cfg: T, overwrite: Boolean = false): Config {
         val file = File(FileHandler.getApplicationFolder(applicationName).path + File.separator + "cfg." + configType.extension)
 
         if (file.exists() && !overwrite)
@@ -70,12 +72,5 @@ object ConfigHandler {
         }
 
         return getConfig(configType, applicationName)
-    }
-
-    /**
-     * The type of file the config is.
-     */
-    enum class ConfigType(val extension: String) {
-        YML("yml"), JSON("json")
     }
 }

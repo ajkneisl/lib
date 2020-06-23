@@ -8,7 +8,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils
  * Log [message] to [app].
  */
 fun <T> T.logTo(app: Application, message: String): T {
-    app.getLogger().info(message)
+    app.logger.debug(message)
     return this
 }
 
@@ -16,7 +16,7 @@ fun <T> T.logTo(app: Application, message: String): T {
  * Log [T].
  */
 fun <T> T.logThis(app: Application): T {
-    app.getLogger().info(this.toString())
+    app.logger.info(this.toString())
     return this
 }
 
@@ -39,8 +39,13 @@ fun <T> T.logThis(): T {
 /**
  * Log a [Throwable] to [Application.getLogger].
  */
-fun <T : Throwable> T.logTo(app: Application): T {
-    app.getLogger().error(ExceptionUtils.getMessage(this))
+fun <T : Throwable> T.logTo(app: Application, fatal: Boolean = false): T {
+    app.logger.error(fatal.eitherOr("FATAL: ", "") + ExceptionUtils.getMessage(this))
+    return this
+}
+
+fun <T : Throwable> T.logThis(fatal: Boolean = false): T {
+    DEFAULT_LOGGER.error(fatal.eitherOr("FATAL: ", "") + ExceptionUtils.getMessage(this))
     return this
 }
 
@@ -48,7 +53,7 @@ fun <T : Throwable> T.logTo(app: Application): T {
  * Log [T] to [Application.getLogger]
  */
 fun <T> T.logDiscord(app: Application): T {
-    app.getWebhook().sendMessage("${app.getName()} (v${app.getVersion()})\n\n" + this.toString())
+    app.sendMessage("${app.name}:${app.version}\n\n" + this.toString())
     return this
 }
 
@@ -56,9 +61,9 @@ fun <T> T.logDiscord(app: Application): T {
  * Log a [Throwable] to [Application.getWebhook].
  */
 fun <T : Throwable> T.logDiscord(app: Application): T {
-    app.getWebhook().sendBigMessage(
+    app.webhook.sendBigMessage(
             ExceptionUtils.getStackTrace(this),
-            "[${app.getName()}:v${app.getVersion()}]:\n`${ExceptionUtils.getMessage(this)}`"
+            "${app.name}:${app.version}\n`${ExceptionUtils.getMessage(this)}`"
     )
     return this
 }

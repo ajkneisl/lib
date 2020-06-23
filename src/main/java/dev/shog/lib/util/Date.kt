@@ -12,6 +12,12 @@ private val FORMATTER = DateTimeFormatter
         .withZone(ZoneId.systemDefault())
 
 /**
+ * Shortcut for [System.currentTimeMillis].
+ */
+fun currentTimeMillis(): Long =
+        System.currentTimeMillis()
+
+/**
  * Get a [Long] as a [Date].
  */
 fun Long.asDate(): Date =

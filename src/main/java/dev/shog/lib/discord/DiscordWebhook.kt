@@ -1,4 +1,4 @@
-package dev.shog.lib.hook
+package dev.shog.lib.discord
 
 import kong.unirest.Unirest
 import org.json.JSONObject
@@ -9,8 +9,9 @@ import java.util.concurrent.CompletableFuture
  * The Discord Webhook Handler
  *
  * @param webhookUrl The URL for the webhook.
+ * @param user The webhook user.
  */
-class DiscordWebhook(private val webhookUrl: String) {
+class DiscordWebhook(private val webhookUrl: String, var user: WebhookUser) {
     /**
      * Send a file & optional message.
      *
