@@ -10,7 +10,7 @@ import java.util.concurrent.CompletableFuture
 /**
  * An application.
  */
-class Application internal constructor(
+class Application(
         val name: String,
         val version: String,
         val config: Config,
