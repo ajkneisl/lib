@@ -1,5 +1,6 @@
 package dev.shog.lib.util
 
+import org.json.JSONObject
 import java.io.*
 
 /**
@@ -7,6 +8,20 @@ import java.io.*
  */
 fun String.toFile(): File =
         File(this)
+
+/**
+ * Read a string from a [File].
+ */
+fun File.readString(): String {
+    return String(readBytes())
+}
+
+/**
+ * Read JSON from a [File]
+ */
+fun File.readJson(): JSONObject {
+    return JSONObject(readString())
+}
 
 /**
  * Write a serializable object to file.
