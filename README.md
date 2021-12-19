@@ -3,14 +3,14 @@
 kotlin library :)
 
 ## How to use using Gradle.
-```
+```groovy
 repositories {
     ...
     maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    implementation 'com.github.shoganeko:lib:Tag'
+    implementation 'com.github.ajkneisl:lib:Tag'
 }
 ```
 
