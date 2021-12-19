@@ -1,24 +1,17 @@
-package dev.shog.lib.util
+package dev.ajkneisl.lib.util
 
-import org.json.JSONObject
 import java.io.*
+import org.json.JSONObject
 
-/**
- * Create a file from [String].
- */
-fun String.toFile(): File =
-        File(this)
+/** Create a file from [String]. */
+fun String.toFile(): File = File(this)
 
-/**
- * Read a string from a [File].
- */
+/** Read a string from a [File]. */
 fun File.readString(): String {
     return String(readBytes())
 }
 
-/**
- * Read JSON from a [File]
- */
+/** Read JSON from a [File] */
 fun File.readJson(): JSONObject {
     return JSONObject(readString())
 }
@@ -29,8 +22,7 @@ fun File.readJson(): JSONObject {
  * @param obj The object to write.
  */
 fun <T> File.writeObject(obj: T) {
-    if (!exists())
-        createNewFile()
+    if (!exists()) createNewFile()
 
     val oos = ObjectOutputStream(FileOutputStream(this))
 
@@ -48,8 +40,7 @@ fun <T> File.readObject(): T? {
             val ois = ObjectInputStream(this.inputStream())
 
             return ois.readObject() as? T
-        } catch (ex: Exception) {
-        }
+        } catch (ex: Exception) {}
     }
 
     return null

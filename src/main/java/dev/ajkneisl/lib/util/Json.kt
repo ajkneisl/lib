@@ -1,11 +1,9 @@
-package dev.shog.lib.util
+package dev.ajkneisl.lib.util
 
 import org.json.JSONArray
 import org.json.JSONObject
 
-/**
- * Create a json object of [objs].
- */
+/** Create a json object of [objs]. */
 fun jsonObjectOf(vararg objs: Pair<String, Any>): JSONObject {
     val json = JSONObject()
 
@@ -14,9 +12,7 @@ fun jsonObjectOf(vararg objs: Pair<String, Any>): JSONObject {
     return json
 }
 
-/**
- * Create a json array of [objs].
- */
+/** Create a json array of [objs]. */
 fun jsonArrayOf(vararg objs: Any): JSONArray {
     val json = JSONArray()
 

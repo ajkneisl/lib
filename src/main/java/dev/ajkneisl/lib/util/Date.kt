@@ -1,4 +1,4 @@
-package dev.shog.lib.util
+package dev.ajkneisl.lib.util
 
 import java.time.Instant
 import java.time.ZoneId
@@ -6,44 +6,27 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.*
 
-private val FORMATTER = DateTimeFormatter
-        .ofLocalizedDateTime(FormatStyle.LONG)
+private val FORMATTER =
+    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG)
         .withLocale(Locale.getDefault())
         .withZone(ZoneId.systemDefault())
 
-/**
- * Shortcut for [System.currentTimeMillis].
- */
-fun currentTimeMillis(): Long =
-        System.currentTimeMillis()
+/** Shortcut for [System.currentTimeMillis]. */
+fun currentTimeMillis(): Long = System.currentTimeMillis()
 
-/**
- * Get a [Long] as a [Date].
- */
-fun Long.asDate(): Date =
-        Date.from(asInstant())
+/** Get a [Long] as a [Date]. */
+fun Long.asDate(): Date = Date.from(asInstant())
 
-/**
- * Get a [Long] as an [Instant].
- */
-fun Long.asInstant(): Instant =
-        Instant.ofEpochMilli(this)
+/** Get a [Long] as an [Instant]. */
+fun Long.asInstant(): Instant = Instant.ofEpochMilli(this)
 
-/**
- * Format a [Long] using [FORMATTER].
- */
-fun Long.defaultFormat(): String =
-        asInstant().defaultFormat()
+/** Format a [Long] using [FORMATTER]. */
+fun Long.defaultFormat(): String = asInstant().defaultFormat()
 
-/**
- * Get the age of a [Long]
- */
-fun Long.getAge(): Long =
-        System.currentTimeMillis() - this
+/** Get the age of a [Long] */
+fun Long.getAge(): Long = System.currentTimeMillis() - this
 
-/**
- * Turn a [Long] into a fancy date.
- */
+/** Turn a [Long] into a fancy date. */
 fun Long.fancyDate(): String {
     var response = ""
 
@@ -57,7 +40,8 @@ fun Long.fancyDate(): String {
     val minutes = seconds / 60
 
     if (minutes < 60)
-        return if (minutes > 1) "$minutes minutes ${seconds - minutes * 60} seconds" else "$minutes minute ${seconds - minutes * 60} seconds"
+        return if (minutes > 1) "$minutes minutes ${seconds - minutes * 60} seconds"
+        else "$minutes minute ${seconds - minutes * 60} seconds"
 
     val hours = minutes / 60
     val hoursMinutes = minutes - hours * 60
@@ -88,8 +72,5 @@ fun Long.fancyDate(): String {
     return response
 }
 
-/**
- * Format a [Instant] to date.
- */
-fun Instant.defaultFormat(): String =
-        FORMATTER.format(this)
+/** Format a [Instant] to date. */
+fun Instant.defaultFormat(): String = FORMATTER.format(this)
