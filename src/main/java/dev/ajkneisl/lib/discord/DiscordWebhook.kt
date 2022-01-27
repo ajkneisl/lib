@@ -5,6 +5,7 @@ import io.ktor.client.call.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
+import io.ktor.client.response.*
 import io.ktor.http.*
 import java.io.File
 import kotlinx.coroutines.delay
@@ -63,7 +64,13 @@ class DiscordWebhook(private val webhookUrl: String) {
             } else {
                 logger.error(
                     "Webhook failed, ${ex.response.status.value} -> ${ex.response.status.description}")
-                logger.trace(ex.response.receive())
+
+                ex.printStackTrace()
+                try {
+                    logger.trace(ex.response.receive())
+                } catch (e: Exception) {
+                    logger.error("The body of the error could not be received.")
+                }
             }
         }
     }
@@ -114,6 +121,29 @@ class DiscordWebhook(private val webhookUrl: String) {
             Lib.HTTP_CLIENT.post<String>(webhookUrl) {
                 contentType(ContentType.Application.Json)
                 body = request
+            }
+        }
+    }
+
+    /** Send a [bigMessage] with a [fileName] and optional [message]. */
+    suspend fun sendBigMessage(bigMessage: String, fileName: String = "", message: String = "") {
+        if (message.length > 2000) {
+            throw WebhookException("Message must be under 2000 characters!")
+        }
+
+        handleRequest {
+            Lib.HTTP_CLIENT.submitFormWithBinaryData(
+                url = webhookUrl,
+                formData = formData {
+                    append("content", "message")
+                    append("file", bigMessage.toByteArray(), Headers.build {
+                        append(HttpHeaders.ContentDisposition, "form-data; name=\"${fileName}\"; filename=\"${fileName}.txt\"")
+                    })
+                }
+            ) {
+                onUpload { bytesSentTotal, contentLength ->
+                    logger.debug("Sent $bytesSentTotal bytes from $contentLength")
+                }
             }
         }
     }

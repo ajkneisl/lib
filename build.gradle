@@ -8,12 +8,11 @@ plugins {
 }
 
 group 'dev.ajkneisl'
-version '2.1.0'
+version '2.2.0'
 
 sourceCompatibility = 1.8
 
 repositories {
-    jcenter()
     maven { url 'https://jitpack.io' }
     mavenCentral()
 }
