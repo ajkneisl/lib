@@ -117,4 +117,21 @@ class DiscordWebhook(private val webhookUrl: String) {
             }
         }
     }
+
+    /** Send a [bigMessage] with a [fileName] and optional [message]. */
+    suspend fun sendBigMessage(bigMessage: String, fileName: String = "", message: String = "") {
+        if (message.length > 2000) {
+            throw WebhookException("Message must be under 2000 characters!")
+        }
+
+        handleRequest {
+            Lib.HTTP_CLIENT.post<String>(webhookUrl) {
+                contentType(ContentType.Application.Json)
+                formData {
+                    append("file", fileName, ContentType.Text.Plain) { append(message) }
+                    append("content", message)
+                }
+            }
+        }
+    }
 }
