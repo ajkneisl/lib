@@ -146,4 +146,3 @@ class DiscordWebhook(private val webhookUrl: String) {
         }
     }
 }
-}
