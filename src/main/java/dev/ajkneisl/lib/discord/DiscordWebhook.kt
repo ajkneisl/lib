@@ -133,7 +133,7 @@ class DiscordWebhook(private val webhookUrl: String) {
             Lib.HTTP_CLIENT.submitFormWithBinaryData(
                 url = webhookUrl,
                 formData = formData {
-                    append("content", "message")
+                    append("content", message)
                     append("file", bigMessage.toByteArray(), Headers.build {
                         append(HttpHeaders.ContentDisposition, "form-data; name=\"${fileName}\"; filename=\"${fileName}.txt\"")
                     })
