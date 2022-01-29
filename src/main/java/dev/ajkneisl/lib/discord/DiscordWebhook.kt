@@ -5,7 +5,6 @@ import io.ktor.client.call.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
-import io.ktor.client.response.*
 import io.ktor.http.*
 import java.io.File
 import kotlinx.coroutines.delay
@@ -65,7 +64,6 @@ class DiscordWebhook(private val webhookUrl: String) {
                 logger.error(
                     "Webhook failed, ${ex.response.status.value} -> ${ex.response.status.description}")
 
-                ex.printStackTrace()
                 try {
                     logger.trace(ex.response.receive())
                 } catch (e: Exception) {
@@ -147,4 +145,5 @@ class DiscordWebhook(private val webhookUrl: String) {
             }
         }
     }
+}
 }
