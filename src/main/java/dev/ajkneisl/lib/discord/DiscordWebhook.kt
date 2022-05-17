@@ -2,7 +2,7 @@ package dev.ajkneisl.lib.discord
 
 import dev.ajkneisl.lib.Lib
 import io.ktor.client.call.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
@@ -65,7 +65,7 @@ class DiscordWebhook(private val webhookUrl: String) {
                     "Webhook failed, ${ex.response.status.value} -> ${ex.response.status.description}")
 
                 try {
-                    logger.trace(ex.response.receive())
+                    logger.trace(ex.response.body())
                 } catch (e: Exception) {
                     logger.error("The body of the error could not be received.")
                 }
@@ -85,7 +85,7 @@ class DiscordWebhook(private val webhookUrl: String) {
         }
 
         handleRequest {
-            Lib.HTTP_CLIENT.post<String>(webhookUrl) {
+            Lib.HTTP_CLIENT.post(webhookUrl) {
                 contentType(ContentType.Application.Json)
                 formData {
                     append("file", file.name, ContentType.defaultForFile(file)) {
@@ -93,7 +93,7 @@ class DiscordWebhook(private val webhookUrl: String) {
                     }
                     append("content", message)
                 }
-            }
+            }.body()
         }
     }
 
@@ -116,10 +116,10 @@ class DiscordWebhook(private val webhookUrl: String) {
         }
 
         handleRequest {
-            Lib.HTTP_CLIENT.post<String>(webhookUrl) {
+            Lib.HTTP_CLIENT.post(webhookUrl) {
                 contentType(ContentType.Application.Json)
-                body = request
-            }
+                setBody(request)
+            }.body()
         }
     }
 
@@ -142,7 +142,7 @@ class DiscordWebhook(private val webhookUrl: String) {
                 onUpload { bytesSentTotal, contentLength ->
                     logger.debug("Sent $bytesSentTotal bytes from $contentLength")
                 }
-            }
+            }.body()
         }
     }
 }
